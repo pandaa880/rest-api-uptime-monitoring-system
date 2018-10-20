@@ -13,14 +13,21 @@ const server = http.createServer((req, res) => {
   const parsedURL = url.parse(req.url, true);
 
   // get the path
+
+  /*
+  * * The Regex in .replace method means that, look for one or more slash symbol at the start of the string and at the end of the string and then replace them with empty string.
+  */
   const path = parsedURL.pathname;
   const trimmedPath = path.replace(/^\/+|\/+$/g, '');
+
+  // get the http method
+  const method = req.method.toUpperCase();
 
   // send the response
   res.end('Hello World\n');
 
   // log the request path
-  console.log(`Request received on path : ${trimmedPath}`);
+  console.log(`Request received on path : ${trimmedPath} with the ${method} method.`);
   
 });
 
