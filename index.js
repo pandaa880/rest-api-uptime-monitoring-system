@@ -5,6 +5,7 @@
 // Dependencies
 const http = require('http');
 const url = require('url');
+const { StringDecoder } = require('string_decoder');
 
 // Create a Server
 const server = http.createServer((req, res) => {
@@ -25,12 +26,25 @@ const server = http.createServer((req, res) => {
   // get the http method
   const method = req.method.toUpperCase();
 
-  // send the response
-  res.end('Hello World\n');
+  // get the headers as an object
+  const headers = req.headers;
 
-  // log the request path
-  console.log(`Request received on path : ${trimmedPath} with the ${method} method and with the query ${JSON.stringify(queryStringObject)}.`);
+  // get the payload if there is any
+  const decoder = new StringDecoder('utf-8');
+  let buffer = '';
+
+  req.on('data', (data) => buffer += decoder.write(data));
+
+  req.on('end', () => {
+    buffer += decoder.end();
+
+    // send the response
+    res.end('Hello World\n');
   
+    // log the request path
+    console.log(`Request received with payload : ${buffer}`);
+  });
+ 
 });
 
 // Start listening
