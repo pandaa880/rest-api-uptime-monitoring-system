@@ -4,17 +4,40 @@
 
 // Dependencies
 const http = require('http');
+const https = require('https');
 const url = require('url');
+const fs = require('fs');
 const { StringDecoder } = require('string_decoder');
 
 const config = require('./config');
 
-// Create a Server
-const server = http.createServer((req, res) => {
+// Instantiate the HTTP server
+const httpServer = http.createServer((req, res) => unifiedServer(req, res));
+;
+// Start the HTTP server
+httpServer.listen(config.httpPort, () => {
+  console.log(`Server is running in ${config.envName} mode on port ${config.httpPort}`);
+});
 
+// HTTPS server options
+const httpsServerOptions = {
+  key: fs.readFileSync('./https/key.pem'),
+  cert: fs.readFileSync('./https/cert.pem')
+};
+
+// Instantiate the HTTPS server
+const httpsServer = https.createServer(httpsServerOptions, (req, res) => unifiedServer(req, res));
+
+// Start the HTTPs server
+httpsServer.listen(config.httpsPort, () => {
+  console.log(`Server is running in ${config.envName} mode on port ${config.httpsPort}`);
+});
+
+// All the server logic for http & https
+const unifiedServer = (req, res) => {
   // get the URL and parse it
   const parsedURL = url.parse(req.url, true);
-  
+    
   // get the path
   /*
   * * The Regex in .replace method means that, look for one or more slash symbol at the start of the string and at the end of the string and then replace them with empty string.
@@ -66,14 +89,7 @@ const server = http.createServer((req, res) => {
       console.log(`Returing this response : ${statusCode} and ${payloadString}`);
     });
   });
- 
-});
-
-// Start listening
-server.listen(config.port, () => {
-  console.log(`Server is running in ${config.envName} mode on port ${config.port}`);
-  console.log(`localhost:${config.port}`);
-});
+}
 
 // Define the handlers
 const handlers = {};
